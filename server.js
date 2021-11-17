@@ -44,6 +44,7 @@ Like.belongsTo(Tweet);
 const init = async()=> {
   try {
   const port = process.env.PORT || 3000;
+  app.listen(port, ()=> console.log(`listening on ${port}`));
   await conn.sync({ force: true});
   const tweet = await Tweet.create({ txt: 'hello world'});
   const likes = new Array(50).fill('').map(_ => {
@@ -59,7 +60,6 @@ const init = async()=> {
   await Promise.all(likes.map( like => Like.create(like)));
   await tweet.reload();
   console.log(tweet.likes);
-  app.listen(port, ()=> console.log(`listening on ${port}`));
   }
   catch(ex){
     console.log(ex);
