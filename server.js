@@ -4,9 +4,21 @@ const Sequelize = require('sequelize');
 const { DataTypes: { INTEGER, STRING, UUID, UUIDV4 } } = Sequelize;
 const conn = new Sequelize(process.env.DATABASE_URL || 'postgres://localhost/acme_db');
 
+
 app.get('/api/tweets', async(req, res, next)=> {
   try {
     res.send(await Tweet.findAll());
+  }
+  catch(ex){
+    next(ex);
+  }
+});
+
+app.get('/api/tweets/:id', async(req, res, next)=> {
+  try {
+    res.send(await Tweet.findByPk(req.params.id, {
+      include: [Like]
+    }));
   }
   catch(ex){
     next(ex);
@@ -23,7 +35,7 @@ const uuid = {
 const Tweet = conn.define('tweet', {
   ...uuid,
   txt: STRING,
-  likes: {
+  _likes: {
     type: INTEGER,
     defaultValue: 0
   }
@@ -35,11 +47,12 @@ const Like = conn.define('like', {
 
 Like.addHook('afterCreate', async function(like){
   const tweet = await Tweet.findByPk(like.tweetId); 
-  tweet.likes++;
+  tweet._likes++;
   await tweet.save();
 });
 
 Like.belongsTo(Tweet);
+Tweet.hasMany(Like);
 
 const init = async()=> {
   try {
@@ -59,7 +72,7 @@ const init = async()=> {
   */
   await Promise.all(likes.map( like => Like.create(like)));
   await tweet.reload();
-  console.log(tweet.likes);
+  console.log(tweet._likes);
   }
   catch(ex){
     console.log(ex);
