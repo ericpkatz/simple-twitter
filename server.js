@@ -60,7 +60,7 @@ const init = async()=> {
   app.listen(port, ()=> console.log(`listening on ${port}`));
   await conn.sync({ force: true});
   const tweet = await Tweet.create({ txt: 'hello world'});
-  const likes = new Array(10).fill('').map(_ => {
+  const likes = new Array(15).fill('').map(_ => {
     return {
       tweetId: tweet.id
     };
